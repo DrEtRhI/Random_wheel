@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomId": {
+        ".read": true,
+        "names": {
+          ".write": true,
+          ".validate": "newData.numChildren() <= 50",
+          "$nameId": {
+            ".validate": "newData.hasChild('text') && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 40"
+          }
+        }
+      }
+    }
+  }
+}
