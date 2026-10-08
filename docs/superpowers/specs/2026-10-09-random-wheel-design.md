@@ -46,10 +46,12 @@ id, carried in the URL fragment: `https://drethi.github.io/Random_wheel/#r=<room
   concurrent edits from different people.
 
 **Session-only exclusions.** The popup's "Remove" button removes a name
-from the *wheel* for the current browser session only (kept in a JS
-`Set`/`sessionStorage`, never written to Firebase). It does **not** touch
-the shared list. A page refresh reloads the full shared list from Firebase
-and clears all session exclusions. The only way to permanently delete a
+from the *wheel* for the current page load only (kept purely in an
+in-memory JS `Set`, never persisted and never written to Firebase). It
+does **not** touch the shared list. Because it is in-memory only (not
+`sessionStorage`, which would survive a refresh — the opposite of what's
+wanted here), a page refresh naturally reloads the full shared list from
+Firebase with no exclusions applied. The only way to permanently delete a
 name from the shared list is the ✕ in the side panel, which does write to
 Firebase (and thus affects everyone).
 
