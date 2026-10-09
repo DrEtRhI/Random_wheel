@@ -2,12 +2,18 @@
   "rules": {
     "rooms": {
       "$roomId": {
+        ".validate": "$roomId.matches(/^[0-9a-z]{8}$/)",
         ".read": true,
         "names": {
-          ".write": true,
-          ".validate": "newData.numChildren() <= 50",
           "$nameId": {
-            ".validate": "newData.hasChild('text') && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 40"
+            ".write": "!newData.exists() || data.exists() || data.parent().numChildren() < 50",
+            ".validate": "newData.hasChildren(['text'])",
+            "text": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+            },
+            "$other": {
+              ".validate": false
+            }
           }
         }
       }
