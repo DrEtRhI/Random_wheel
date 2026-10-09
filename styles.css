@@ -82,26 +82,54 @@ body[data-season="autumn"] {
   top: 50%;
   width: 24px;
   height: 24px;
-  background: var(--pointer) center / cover no-repeat;
+  background: var(--pointer);
   border: 2px solid var(--border);
   transform: translateY(-50%) rotate(45deg);
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#wheel-pointer::after {
+  content: "";
+  display: block;
+  transform: rotate(-45deg);
+  font-size: 14px;
+  line-height: 1;
+  font-family: "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 }
 
 body[data-season="winter"] #wheel-pointer {
-  background-image: url("images/pointer-winter.svg");
+  background: #d6ecff;
+}
+
+body[data-season="winter"] #wheel-pointer::after {
+  content: "\2744\FE0F";
 }
 
 body[data-season="spring"] #wheel-pointer {
-  background-image: url("images/pointer-spring.svg");
+  background: #ffe3ef;
+}
+
+body[data-season="spring"] #wheel-pointer::after {
+  content: "\1F338";
 }
 
 body[data-season="summer"] #wheel-pointer {
-  background-image: url("images/pointer-summer.svg");
+  background: #fff3b0;
+}
+
+body[data-season="summer"] #wheel-pointer::after {
+  content: "\2600\FE0F";
 }
 
 body[data-season="autumn"] #wheel-pointer {
-  background-image: url("images/pointer-autumn.svg");
+  background: #ffe3c2;
+}
+
+body[data-season="autumn"] #wheel-pointer::after {
+  content: "\1F342";
 }
 
 #wheel-empty-message {
