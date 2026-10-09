@@ -5,6 +5,7 @@
         ".validate": "$roomId.matches(/^[0-9a-z]{8}$/)",
         ".read": true,
         "names": {
+          ".write": "!data.exists() && newData.numChildren() === 0",
           "$nameId": {
             ".write": "!newData.exists() || data.exists() || data.parent().numChildren() < 50",
             ".validate": "newData.hasChildren(['text'])",
