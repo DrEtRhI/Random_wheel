@@ -84,4 +84,44 @@ describe("wirePopupButtons", () => {
     expect(removeCountA).toBe(0);
     expect(removeCountB).toBe(1);
   });
+
+  test("copy button flashes 'Copied!' on success", async () => {
+    showWinnerPopup("Alice");
+    global.html2canvas = async () => ({ toBlob: (cb) => cb({ fakeBlob: true }) });
+    global.ClipboardItem = function (data) {
+      this.data = data;
+    };
+    global.navigator = { clipboard: { write: async () => {} } };
+
+    const copyButton = elements["winner-copy-button"];
+    copyButton.textContent = "📷 Copy image";
+    wirePopupButtons({ onRemove: () => {} });
+
+    await copyButton.onclick();
+
+    expect(copyButton.textContent).toBe("Copied!");
+  });
+
+  test("copy button flashes 'Copy failed' when the clipboard write rejects", async () => {
+    showWinnerPopup("Alice");
+    global.html2canvas = async () => ({ toBlob: (cb) => cb({ fakeBlob: true }) });
+    global.ClipboardItem = function (data) {
+      this.data = data;
+    };
+    global.navigator = {
+      clipboard: {
+        write: async () => {
+          throw new Error("denied");
+        },
+      },
+    };
+
+    const copyButton = elements["winner-copy-button"];
+    copyButton.textContent = "📷 Copy image";
+    wirePopupButtons({ onRemove: () => {} });
+
+    await copyButton.onclick();
+
+    expect(copyButton.textContent).toBe("Copy failed");
+  });
 });

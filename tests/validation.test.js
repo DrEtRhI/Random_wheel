@@ -43,4 +43,24 @@ describe("validateNewName", () => {
     const result = validateNewName("Zoe", MAX_NAMES);
     expect(result.ok).toBe(false);
   });
+
+  test("rejects a name that already exists in the list (exact match)", () => {
+    const result = validateNewName("Alice", 1, ["Alice"]);
+    expect(result).toEqual({ ok: false, error: "That name is already on the wheel." });
+  });
+
+  test("rejects a duplicate name regardless of case and surrounding whitespace", () => {
+    const result = validateNewName("  aLICE  ", 1, ["Alice"]);
+    expect(result.ok).toBe(false);
+  });
+
+  test("accepts a name that doesn't match any existing name", () => {
+    const result = validateNewName("Bob", 1, ["Alice"]);
+    expect(result).toEqual({ ok: true, value: "Bob" });
+  });
+
+  test("defaults to no duplicate check when existingTexts is omitted", () => {
+    const result = validateNewName("Alice", 0);
+    expect(result.ok).toBe(true);
+  });
 });

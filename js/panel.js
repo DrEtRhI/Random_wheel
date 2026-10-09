@@ -22,10 +22,11 @@ export function renderNameList(listEl, names, onRemove) {
   }
 }
 
-export function wireAddForm({ formEl, inputEl, messageEl, getCurrentCount, onAdd }) {
+export function wireAddForm({ formEl, inputEl, messageEl, getCurrentCount, getExistingTexts, onAdd }) {
   formEl.addEventListener("submit", (event) => {
     event.preventDefault();
-    const result = validateNewName(inputEl.value, getCurrentCount());
+    const existingTexts = getExistingTexts ? getExistingTexts() : [];
+    const result = validateNewName(inputEl.value, getCurrentCount(), existingTexts);
     if (!result.ok) {
       messageEl.textContent = result.error;
       return;

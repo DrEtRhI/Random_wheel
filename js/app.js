@@ -104,6 +104,7 @@ async function main() {
     inputEl: document.getElementById("add-name-input"),
     messageEl: panelMessageEl,
     getCurrentCount: () => sharedNames.length,
+    getExistingTexts: () => sharedNames.map((n) => n.text),
     onAdd: async (text) => {
       try {
         await addNameToRoom(roomId, text);

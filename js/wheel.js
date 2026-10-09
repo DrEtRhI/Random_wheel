@@ -9,6 +9,43 @@ function truncateToWidth(ctx, text, maxWidth) {
   return `${truncated}…`;
 }
 
+const MAX_LABEL_FONT_PX = 28;
+const MIN_LABEL_FONT_PX = 6;
+const fontSizeCache = new Map();
+
+function computeLabelFontSize(ctx, names, sliceAngle, radius, maxWidth) {
+  if (typeof ctx.measureText !== "function") return MAX_LABEL_FONT_PX;
+
+  const cacheKey = `${names.join("")}|${radius.toFixed(1)}|${sliceAngle.toFixed(4)}`;
+  const cached = fontSizeCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
+  let longest = "";
+  for (const name of names) {
+    if (name.length > longest.length) longest = name;
+  }
+
+  const angleCap = Math.max(MIN_LABEL_FONT_PX, radius * sliceAngle * 0.8);
+  let lo = MIN_LABEL_FONT_PX;
+  let hi = Math.min(MAX_LABEL_FONT_PX, angleCap);
+  let best = lo;
+
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    ctx.font = `${mid}px sans-serif`;
+    const width = ctx.measureText(longest).width;
+    if (width <= maxWidth) {
+      best = mid;
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+
+  fontSizeCache.set(cacheKey, best);
+  return best;
+}
+
 export function renderWheel(ctx, { names, colors, rotationDeg }) {
   const canvas = ctx.canvas;
   const size = Math.min(canvas.width, canvas.height);
@@ -34,6 +71,8 @@ export function renderWheel(ctx, { names, colors, rotationDeg }) {
   const n = names.length;
   const sliceAngle = (Math.PI * 2) / n;
   const rotationRad = (rotationDeg * Math.PI) / 180;
+  const maxLabelWidth = radius - 20;
+  const fontSize = computeLabelFontSize(ctx, names, sliceAngle, radius, maxLabelWidth);
 
   ctx.save();
   ctx.translate(cx, cy);
@@ -62,8 +101,12 @@ export function renderWheel(ctx, { names, colors, rotationDeg }) {
     ctx.textAlign = isLeftHalf ? "left" : "right";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#1e1e1e";
-    ctx.font = `${Math.min(16, radius * sliceAngle * 0.8)}px sans-serif`;
-    const labelText = truncateToWidth(ctx, names[i], radius - 20);
+    ctx.font = `${fontSize}px sans-serif`;
+    // computeLabelFontSize already guarantees the longest name fits at
+    // this size; truncation here is only a safety net for pathological
+    // cases (e.g. very wide glyphs) so a label can never visually
+    // overflow its slice.
+    const labelText = truncateToWidth(ctx, names[i], maxLabelWidth);
     ctx.fillText(labelText, isLeftHalf ? -(radius - 10) : radius - 10, 0);
     ctx.restore();
   }

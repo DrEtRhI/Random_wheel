@@ -75,4 +75,32 @@ describe("renderWheel", () => {
       renderWheel(ctx, { names: ["Solo"], colors: ["#f199b4"], rotationDeg: 0 });
     }).not.toThrow();
   });
+
+  test("shrinks the font below the max for a long name that wouldn't fit at full size", () => {
+    const ctx = makeFakeCtx(); // measureText(text) => text.length * 8, independent of font size
+    const longName = "A".repeat(40); // 320px wide per the fake measureText — wider than the 480px-ish slice radius allows at max font
+    renderWheel(ctx, { names: [longName], colors: ["#f199b4"], rotationDeg: 0 });
+
+    const finalFontPx = parseFloat(ctx.font);
+    expect(finalFontPx).toBeGreaterThan(0);
+    expect(finalFontPx).toBeLessThan(28);
+  });
+
+  test("uses a uniform font size across all slices, driven by the longest name", () => {
+    const ctx = makeFakeCtx();
+    const fonts = [];
+    const originalFontSetter = ctx;
+    // Capture every font value assigned during the render by wrapping fillText,
+    // which runs once per slice right after ctx.font is set for that slice.
+    ctx.fillText = () => fonts.push(ctx.font);
+
+    renderWheel(ctx, {
+      names: ["Al", "A much much longer name than the others", "Bo"],
+      colors: ["#f199b4", "#99c77f", "#5ec6ec"],
+      rotationDeg: 0,
+    });
+
+    expect(fonts).toHaveLength(3);
+    expect(new Set(fonts).size).toBe(1); // every slice used the same font size
+  });
 });

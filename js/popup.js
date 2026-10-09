@@ -24,15 +24,19 @@ export function wirePopupButtons({ onRemove }) {
   okButton.onclick = hideWinnerPopup;
 
   copyButton.onclick = async () => {
-    try {
-      await captureAndCopyImage();
-    } catch (err) {
-      console.error("Copy to clipboard failed:", err);
-      const originalLabel = copyButton.textContent;
-      copyButton.textContent = "Copy failed";
+    const originalLabel = copyButton.textContent;
+    const flashLabel = (text) => {
+      copyButton.textContent = text;
       setTimeout(() => {
         copyButton.textContent = originalLabel;
       }, 2000);
+    };
+    try {
+      await captureAndCopyImage();
+      flashLabel("Copied!");
+    } catch (err) {
+      console.error("Copy to clipboard failed:", err);
+      flashLabel("Copy failed");
     }
   };
 

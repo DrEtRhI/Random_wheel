@@ -121,6 +121,26 @@ describe("wireAddForm", () => {
     expect(messageEl.textContent).toBe("Name cannot be empty.");
   });
 
+  test("submitting a name that already exists shows a duplicate error and does not call onAdd", () => {
+    const formEl = makeFakeElement();
+    const inputEl = makeFakeElement({ value: "alice" });
+    const messageEl = makeFakeElement();
+    const added = [];
+    wireAddForm({
+      formEl,
+      inputEl,
+      messageEl,
+      getCurrentCount: () => 1,
+      getExistingTexts: () => ["Alice"],
+      onAdd: (text) => added.push(text),
+    });
+
+    formEl.dispatch("submit", { preventDefault: () => {} });
+
+    expect(added).toEqual([]);
+    expect(messageEl.textContent).toBe("That name is already on the wheel.");
+  });
+
   test("submitting at the name cap shows the cap error and does not call onAdd", () => {
     const formEl = makeFakeElement();
     const inputEl = makeFakeElement({ value: "Zoe" });
