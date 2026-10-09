@@ -28,6 +28,11 @@ export function wirePopupButtons({ onRemove }) {
       await captureAndCopyImage();
     } catch (err) {
       console.error("Copy to clipboard failed:", err);
+      const originalLabel = copyButton.textContent;
+      copyButton.textContent = "Copy failed";
+      setTimeout(() => {
+        copyButton.textContent = originalLabel;
+      }, 2000);
     }
   };
 
