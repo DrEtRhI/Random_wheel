@@ -13,6 +13,7 @@ import { showWinnerPopup, wirePopupButtons } from "./popup.js";
 import { MAX_NAMES } from "./validation.js";
 import { unlockAudio, playTick, playWin } from "./sound.js";
 import { getCurrentSeason } from "./season.js";
+import { getRandomTheme } from "./themes.js";
 
 const colorCache = new Map();
 function getColorsForCount(n) {
@@ -47,6 +48,14 @@ async function main() {
   const resetWheelButtonEl = document.getElementById("reset-wheel-button");
   const addNameInputEl = document.getElementById("add-name-input");
   const addNameButtonEl = document.getElementById("add-name-button");
+  const randomThemeButtonEl = document.getElementById("random-theme-button");
+
+  randomThemeButtonEl.addEventListener("click", () => {
+    const theme = getRandomTheme();
+    document.body.style.backgroundImage = `url("images/${theme.image}")`;
+    document.body.style.setProperty("--pointer-bg", "#ffffff");
+    document.body.style.setProperty("--pointer-emoji", JSON.stringify(theme.emoji));
+  });
 
   const spinController = createSpinController({
     ctx,

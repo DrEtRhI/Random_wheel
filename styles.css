@@ -58,7 +58,17 @@ body[data-season="autumn"] {
 #wheel-section {
   flex: 1 1 500px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+#random-theme-button {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
 }
 
 #wheel-wrapper {
@@ -82,7 +92,7 @@ body[data-season="autumn"] {
   top: 50%;
   width: 24px;
   height: 24px;
-  background: var(--pointer);
+  background: var(--pointer-bg, var(--pointer));
   border: 2px solid var(--border);
   transform: translateY(-50%) rotate(45deg);
   pointer-events: none;
@@ -92,7 +102,7 @@ body[data-season="autumn"] {
 }
 
 #wheel-pointer::after {
-  content: "";
+  content: var(--pointer-emoji, "");
   display: block;
   transform: rotate(-45deg);
   font-size: 14px;
@@ -100,36 +110,24 @@ body[data-season="autumn"] {
   font-family: "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 }
 
-body[data-season="winter"] #wheel-pointer {
-  background: #d6ecff;
+body[data-season="winter"] {
+  --pointer-bg: #d6ecff;
+  --pointer-emoji: "\2744\FE0F";
 }
 
-body[data-season="winter"] #wheel-pointer::after {
-  content: "\2744\FE0F";
+body[data-season="spring"] {
+  --pointer-bg: #ffe3ef;
+  --pointer-emoji: "\1F338";
 }
 
-body[data-season="spring"] #wheel-pointer {
-  background: #ffe3ef;
+body[data-season="summer"] {
+  --pointer-bg: #fff3b0;
+  --pointer-emoji: "\2600\FE0F";
 }
 
-body[data-season="spring"] #wheel-pointer::after {
-  content: "\1F338";
-}
-
-body[data-season="summer"] #wheel-pointer {
-  background: #fff3b0;
-}
-
-body[data-season="summer"] #wheel-pointer::after {
-  content: "\2600\FE0F";
-}
-
-body[data-season="autumn"] #wheel-pointer {
-  background: #ffe3c2;
-}
-
-body[data-season="autumn"] #wheel-pointer::after {
-  content: "\1F342";
+body[data-season="autumn"] {
+  --pointer-bg: #ffe3c2;
+  --pointer-emoji: "\1F342";
 }
 
 #wheel-empty-message {
