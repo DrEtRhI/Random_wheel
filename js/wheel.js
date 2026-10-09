@@ -1,3 +1,14 @@
+function truncateToWidth(ctx, text, maxWidth) {
+  if (typeof ctx.measureText !== "function") return text;
+  if (ctx.measureText(text).width <= maxWidth) return text;
+
+  let truncated = text;
+  while (truncated.length > 1 && ctx.measureText(`${truncated}…`).width > maxWidth) {
+    truncated = truncated.slice(0, -1);
+  }
+  return `${truncated}…`;
+}
+
 export function renderWheel(ctx, { names, colors, rotationDeg }) {
   const canvas = ctx.canvas;
   const size = Math.min(canvas.width, canvas.height);
@@ -43,13 +54,17 @@ export function renderWheel(ctx, { names, colors, rotationDeg }) {
     ctx.stroke();
 
     const mid = start + sliceAngle / 2;
+    const normalizedMid = ((mid % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const isLeftHalf = normalizedMid > Math.PI / 2 && normalizedMid < (3 * Math.PI) / 2;
+
     ctx.save();
-    ctx.rotate(mid);
-    ctx.textAlign = "right";
+    ctx.rotate(isLeftHalf ? mid + Math.PI : mid);
+    ctx.textAlign = isLeftHalf ? "left" : "right";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#1e1e1e";
-    ctx.font = "16px sans-serif";
-    ctx.fillText(names[i], radius - 10, 0);
+    ctx.font = `${Math.min(16, radius * sliceAngle * 0.8)}px sans-serif`;
+    const labelText = truncateToWidth(ctx, names[i], radius - 20);
+    ctx.fillText(labelText, isLeftHalf ? -(radius - 10) : radius - 10, 0);
     ctx.restore();
   }
 

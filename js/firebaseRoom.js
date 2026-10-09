@@ -40,10 +40,12 @@ export function subscribeToNames(roomId, callback) {
   const namesRef = namesRefFor(roomId);
   const unsubscribe = onValue(namesRef, (snapshot) => {
     const val = snapshot.val() || {};
-    const names = Object.entries(val).map(([id, data]) => ({
-      id,
-      text: data.text,
-    }));
+    const names = Object.entries(val)
+      .filter(([, data]) => data && typeof data.text === "string")
+      .map(([id, data]) => ({
+        id,
+        text: data.text,
+      }));
     callback(names);
   });
   return unsubscribe;
