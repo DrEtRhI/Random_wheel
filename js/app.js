@@ -12,6 +12,7 @@ import { renderNameList, wireAddForm } from "./panel.js";
 import { showWinnerPopup, wirePopupButtons } from "./popup.js";
 import { MAX_NAMES } from "./validation.js";
 import { unlockAudio, playTick, playWin } from "./sound.js";
+import { getCurrentSeason } from "./season.js";
 
 const colorCache = new Map();
 function getColorsForCount(n) {
@@ -22,6 +23,8 @@ function getColorsForCount(n) {
 }
 
 async function main() {
+  document.body.dataset.season = getCurrentSeason();
+
   let roomId = getRoomIdFromHash(location.hash);
   if (!roomId) {
     roomId = generateRoomId();

@@ -23,6 +23,26 @@ body {
   font-family: "Segoe UI", system-ui, sans-serif;
   background: var(--surface);
   color: var(--ink);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+body[data-season="winter"] {
+  background-image: url("images/bg-winter.jpg");
+}
+
+body[data-season="spring"] {
+  background-image: url("images/bg-spring.jpg");
+}
+
+body[data-season="summer"] {
+  background-image: url("images/bg-summer.jpg");
+}
+
+body[data-season="autumn"] {
+  background-image: url("images/bg-autumn.jpg");
 }
 
 #app {
@@ -62,10 +82,26 @@ body {
   top: 50%;
   width: 24px;
   height: 24px;
-  background: var(--pointer);
+  background: var(--pointer) center / cover no-repeat;
   border: 2px solid var(--border);
   transform: translateY(-50%) rotate(45deg);
   pointer-events: none;
+}
+
+body[data-season="winter"] #wheel-pointer {
+  background-image: url("images/pointer-winter.svg");
+}
+
+body[data-season="spring"] #wheel-pointer {
+  background-image: url("images/pointer-spring.svg");
+}
+
+body[data-season="summer"] #wheel-pointer {
+  background-image: url("images/pointer-summer.svg");
+}
+
+body[data-season="autumn"] #wheel-pointer {
+  background-image: url("images/pointer-autumn.svg");
 }
 
 #wheel-empty-message {
@@ -93,6 +129,9 @@ body {
 #panel-section {
   flex: 1 1 280px;
   max-width: 320px;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 10px;
+  padding: 16px;
 }
 
 #name-list {
