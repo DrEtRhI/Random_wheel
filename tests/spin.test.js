@@ -84,6 +84,27 @@ describe("createSpinController", () => {
     expect(completions).toBe(1);
   });
 
+  test("onTick fires once per slice boundary crossed during the spin", async () => {
+    let tickCount = 0;
+    const controller = createSpinController({
+      ctx: makeFakeCtx(),
+      getColors: (n) => Array(n).fill("#fff"),
+      onTick: () => tickCount++,
+    });
+
+    const winner = await new Promise((resolve) => {
+      controller.spin(NAMES, (w) => resolve(w));
+    });
+
+    // computeSpinTarget adds [3,5] full turns (1080-1800 deg) plus a [0,360)
+    // offset, so the total rotation added lands in [1080, 2160). With 3
+    // names (120 deg/slice) and starting from rotation 0, that's between
+    // floor(1080/120)=9 and floor(just-under-2160/120)=17 boundary crossings.
+    expect(tickCount).toBeGreaterThanOrEqual(9);
+    expect(tickCount).toBeLessThanOrEqual(17);
+    expect(NAMES.map((n) => n.id)).toContain(winner.id);
+  });
+
   test("spin() with an empty names array is a no-op and never calls onComplete", async () => {
     const controller = createSpinController({ ctx: makeFakeCtx(), getColors: (n) => Array(n).fill("#fff") });
     let called = false;

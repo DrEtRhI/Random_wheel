@@ -11,6 +11,7 @@ import { createSpinController } from "./spin.js";
 import { renderNameList, wireAddForm } from "./panel.js";
 import { showWinnerPopup, wirePopupButtons } from "./popup.js";
 import { MAX_NAMES } from "./validation.js";
+import { unlockAudio, playTick, playWin } from "./sound.js";
 
 const colorCache = new Map();
 function getColorsForCount(n) {
@@ -47,6 +48,7 @@ async function main() {
   const spinController = createSpinController({
     ctx,
     getColors: getColorsForCount,
+    onTick: playTick,
   });
 
   resetWheelButtonEl.addEventListener("click", () => {
@@ -120,7 +122,9 @@ async function main() {
     const wheelNames = getWheelNames();
     if (wheelNames.length === 0) return;
 
+    unlockAudio();
     spinController.spin(wheelNames, (winner) => {
+      playWin();
       showWinnerPopup(winner.text);
       wirePopupButtons({
         onRemove: () => {
