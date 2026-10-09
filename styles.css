@@ -67,7 +67,7 @@ body[data-season="autumn"] {
   padding: 8px 14px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.55);
   cursor: pointer;
 }
 
@@ -84,6 +84,7 @@ body[data-season="autumn"] {
   border-radius: 50%;
   cursor: pointer;
   touch-action: manipulation;
+  opacity: 0.85;
 }
 
 #wheel-pointer {
@@ -155,7 +156,7 @@ body[data-season="autumn"] {
 #panel-section {
   flex: 1 1 280px;
   max-width: 320px;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.55);
   border-radius: 10px;
   padding: 16px;
 }
@@ -175,7 +176,7 @@ body[data-season="autumn"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--panel-bg);
+  background: rgba(247, 247, 245, 0.6);
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 6px 10px;
