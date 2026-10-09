@@ -4,10 +4,14 @@ import {
   subscribeToNames,
   addNameToRoom,
   removeNameFromRoom,
+  startSpin,
+  subscribeToSpin,
+  getServerNow,
 } from "./firebaseRoom.js";
 import { generateSliceColors } from "./colors.js";
 import { createExclusionStore } from "./exclusionStore.js";
 import { createSpinController } from "./spin.js";
+import { computeSpinTarget } from "./wheelGeometry.js";
 import { renderNameList, wireAddForm } from "./panel.js";
 import { showWinnerPopup, wirePopupButtons } from "./popup.js";
 import { MAX_NAMES } from "./validation.js";
@@ -113,6 +117,39 @@ async function main() {
     renderAll();
   });
 
+  let lastHandledSpinStartedAt = null;
+
+  subscribeToSpin(roomId, (spinEvent) => {
+    if (!spinEvent || spinEvent.startedAt === lastHandledSpinStartedAt) return;
+    lastHandledSpinStartedAt = spinEvent.startedAt;
+
+    const elapsedMs = getServerNow() - spinEvent.startedAt;
+    spinController.playSpinEvent(
+      {
+        startRotation: spinEvent.startRotation,
+        targetRotation: spinEvent.targetRotation,
+        names: spinEvent.names,
+        elapsedMs,
+      },
+      (winner) => {
+        playWin();
+        showWinnerPopup(winner.text);
+        wirePopupButtons({
+          onRemove: () => {
+            exclusions.excludeName(winner.id);
+            renderAll();
+          },
+        });
+
+        if (pendingNames) {
+          sharedNames = pendingNames;
+          pendingNames = null;
+          renderAll();
+        }
+      }
+    );
+  });
+
   wireAddForm({
     formEl: document.getElementById("add-name-form"),
     inputEl: document.getElementById("add-name-input"),
@@ -129,28 +166,19 @@ async function main() {
     },
   });
 
-  canvas.addEventListener("click", () => {
+  canvas.addEventListener("click", async () => {
     if (spinController.isSpinning()) return;
     const wheelNames = getWheelNames();
     if (wheelNames.length === 0) return;
 
     unlockAudio();
-    spinController.spin(wheelNames, (winner) => {
-      playWin();
-      showWinnerPopup(winner.text);
-      wirePopupButtons({
-        onRemove: () => {
-          exclusions.excludeName(winner.id);
-          renderAll();
-        },
-      });
-
-      if (pendingNames) {
-        sharedNames = pendingNames;
-        pendingNames = null;
-        renderAll();
-      }
-    });
+    const startRotation = spinController.getRotation();
+    const targetRotation = computeSpinTarget(startRotation);
+    try {
+      await startSpin(roomId, { startRotation, targetRotation, names: wheelNames });
+    } catch (err) {
+      console.error("Failed to start spin:", err);
+    }
   });
 
   renderAll();

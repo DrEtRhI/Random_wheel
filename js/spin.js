@@ -1,7 +1,7 @@
 import { computeSpinTarget, computeWinnerIndex } from "./wheelGeometry.js";
 import { renderWheel } from "./wheel.js";
 
-const SPIN_DURATION_MS = 4000;
+export const SPIN_DURATION_MS = 4000;
 
 function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
@@ -19,18 +19,17 @@ export function createSpinController({ ctx, getColors, onTick }) {
     });
   }
 
-  function spin(names, onComplete) {
-    if (spinning || names.length === 0) return;
+  function animate({ names, startRotation, targetRotation, elapsedMs, onComplete }) {
     spinning = true;
 
-    const startRotation = rotationDeg;
-    const targetRotation = computeSpinTarget(startRotation);
-    const startTime = performance.now();
+    const animStart = performance.now() - elapsedMs;
     const sliceAngleDeg = 360 / names.length;
-    let lastBoundaryCrossed = Math.floor(startRotation / sliceAngleDeg);
+    const startingRotation =
+      startRotation + (targetRotation - startRotation) * easeOutCubic(Math.min(elapsedMs / SPIN_DURATION_MS, 1));
+    let lastBoundaryCrossed = Math.floor(startingRotation / sliceAngleDeg);
 
     function frame(now) {
-      const elapsed = now - startTime;
+      const elapsed = now - animStart;
       const t = Math.min(elapsed / SPIN_DURATION_MS, 1);
       rotationDeg = startRotation + (targetRotation - startRotation) * easeOutCubic(t);
       draw(names);
@@ -55,6 +54,19 @@ export function createSpinController({ ctx, getColors, onTick }) {
     requestAnimationFrame(frame);
   }
 
+  function spin(names, onComplete) {
+    if (spinning || names.length === 0) return;
+    const startRotation = rotationDeg;
+    const targetRotation = computeSpinTarget(startRotation);
+    animate({ names, startRotation, targetRotation, elapsedMs: 0, onComplete });
+    return { startRotation, targetRotation };
+  }
+
+  function playSpinEvent({ names, startRotation, targetRotation, elapsedMs }, onComplete) {
+    if (spinning || !names || names.length === 0) return;
+    animate({ names, startRotation, targetRotation, elapsedMs, onComplete });
+  }
+
   function isSpinning() {
     return spinning;
   }
@@ -63,5 +75,5 @@ export function createSpinController({ ctx, getColors, onTick }) {
     return rotationDeg;
   }
 
-  return { spin, isSpinning, draw, getRotation };
+  return { spin, playSpinEvent, isSpinning, draw, getRotation };
 }
