@@ -1,5 +1,5 @@
-export const LIGHTNESS = 0.78;
-export const CHROMA = 0.11;
+export const LIGHTNESS = 0.86;
+export const CHROMA = 0.07;
 
 function circDist(a, b, n) {
   const d = Math.abs(a - b);
