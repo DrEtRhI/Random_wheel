@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomId": {
+        ".validate": "$roomId.matches(/^[0-9a-z]{8}$/)",
+        ".read": true,
+        "names": {
+          ".write": "!data.exists()",
+          "$nameId": {
+            ".write": true,
+            ".validate": "newData.hasChildren(['text'])",
+            "text": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    }
+  }
+}

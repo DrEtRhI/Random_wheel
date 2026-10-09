@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Wheel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <section id="wheel-section">
+      <div id="wheel-wrapper">
+        <canvas id="wheel-canvas" width="500" height="500"></canvas>
+        <div id="wheel-pointer" aria-hidden="true"></div>
+        <p id="wheel-empty-message" hidden>Add names to start</p>
+        <button id="reset-wheel-button" type="button" hidden>Reset wheel</button>
+      </div>
+    </section>
+
+    <section id="panel-section">
+      <h2>Names</h2>
+      <ul id="name-list"></ul>
+      <form id="add-name-form">
+        <input
+          id="add-name-input"
+          type="text"
+          maxlength="40"
+          placeholder="Add a name"
+          required
+        />
+        <button type="submit" id="add-name-button">Add</button>
+      </form>
+      <p id="panel-message" role="status"></p>
+    </section>
+  </div>
+
+  <div id="winner-popup" hidden>
+    <div id="winner-popup-content">
+      <p id="winner-name"></p>
+      <div id="winner-popup-actions">
+        <button id="winner-ok-button" type="button">OK</button>
+        <button id="winner-copy-button" type="button">📷 Copy image</button>
+        <button id="winner-remove-button" type="button">🗑 Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+  ></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

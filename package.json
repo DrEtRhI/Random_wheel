@@ -1,0 +1,7 @@
+{
+  "name": "random-wheel",
+  "private": true,
+  "scripts": {
+    "test": "bun test"
+  }
+}
