@@ -59,44 +59,62 @@ Firebase (and thus affects everyone).
 
 Hard limits, enforced in two layers:
 
-- **Client-side** (UX): name input has `maxlength=40`; once a room holds 50
+- **Client-side** (UX + the only enforcement of the 50-name cap — see
+  note below): name input has `maxlength=40`; once a room holds 50
   names, the Add control disables with a "List full (50 max)" message.
-- **Firebase Realtime Database rules** (the real backstop — the only layer
-  a modified/malicious client can't bypass):
-  - Reject any write to `/rooms/<roomId>/names` that would bring the child
-    count above 50.
-  - Reject any name whose `text` exceeds 40 characters.
+- **Firebase Realtime Database rules** (enforces what it can — see
+  known limitation below):
+  - Reject any name whose `text` exceeds 40 characters, is empty, or
+    isn't a string; reject any extra fields beyond `text` on a name
+    record.
   - Room ids are fixed-format 8-char base36 strings; no arbitrary-depth
     writes allowed outside `/rooms/<roomId>/names/<nameId>/text`.
-- At this ceiling a room's JSON is a few KB; well within the Spark plan's
-  1GB stored / 10GB served per month even with many rooms and frequent
-  live updates.
+- **Known limitation — the 50-name cap is client-side only, not
+  rules-enforced.** The Realtime Database rules language has no
+  function to count a node's children (`numChildren()` exists on the
+  client SDK's `DataSnapshot`, but not in the rules expression
+  language — confirmed against the live rules compiler, which rejects
+  it with "No such method/property 'numChildren'"). Enforcing a true
+  per-room count cap server-side would require a denormalized counter
+  field updated atomically on every add/remove, which adds real
+  complexity and is still not fully tamper-proof against a client that
+  skips updating the counter. Given the Spark plan's actual free quota
+  (1GB stored / 10GB served per month) and that a per-room cap doesn't
+  stop anyone from creating unlimited rooms anyway, this was judged not
+  worth the complexity: even a room spammed with thousands of
+  40-character names stays a small fraction of the free tier.
+- At the intended 50-name ceiling a room's JSON is a few KB; well
+  within the Spark plan's quota even with many rooms and frequent live
+  updates — and the per-name length cap plus room-id format validation
+  still bound how fast a single room's storage can grow.
 
-Example rules (final values to be written into the Firebase console as part
-of implementation):
+Final rules, as published to the Firebase console:
 
 ```json
 {
   "rules": {
     "rooms": {
       "$roomId": {
+        ".validate": "$roomId.matches(/^[0-9a-z]{8}$/)",
         ".read": true,
         "names": {
-          ".write": "(!data.exists() || data.numChildren() < 50) && newData.numChildren() <= 50",
+          ".write": "!data.exists()",
           "$nameId": {
-            ".validate": "newData.hasChild('text') && newData.child('text').isString() && newData.child('text').val().length <= 40"
+            ".write": true,
+            ".validate": "newData.hasChildren(['text'])",
+            "text": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+            },
+            "$other": {
+              ".validate": false
+            }
           }
         }
       }
-    },
-    "$other": { ".read": false, ".write": false }
+    }
   }
 }
 ```
-
-(Exact rule syntax will be verified against Firebase's rule language during
-implementation — the intent above — read open, write capped by count and
-per-name length — is the contract.)
 
 ## 3. Page layout
 
