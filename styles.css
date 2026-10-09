@@ -28,6 +28,7 @@ body {
 #app {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 32px;
   max-width: 1000px;
   margin: 0 auto;
@@ -43,6 +44,7 @@ body {
 #wheel-wrapper {
   position: relative;
   width: min(500px, 90vw);
+  height: min(500px, 90vw);
   aspect-ratio: 1 / 1;
 }
 
