@@ -16,6 +16,25 @@
               ".validate": false
             }
           }
+        },
+        "spin": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['startedAt', 'startRotation', 'targetRotation', 'names'])",
+          "startedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "startRotation": {
+            ".validate": "newData.isNumber()"
+          },
+          "targetRotation": {
+            ".validate": "newData.isNumber()"
+          },
+          "names": {
+            ".validate": "newData.hasChildren()"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       }
     }

@@ -119,3 +119,60 @@ describe("createSpinController", () => {
     expect(controller.isSpinning()).toBe(false);
   });
 });
+
+describe("createSpinController.playSpinEvent", () => {
+  test("animates a shared spin event from elapsedMs=0 and calls onComplete with a winner from the event's names", async () => {
+    const controller = createSpinController({ ctx: makeFakeCtx(), getColors: (n) => Array(n).fill("#fff") });
+
+    const winner = await new Promise((resolve) => {
+      controller.playSpinEvent(
+        { startRotation: 0, targetRotation: 1234, names: NAMES, elapsedMs: 0 },
+        (w) => resolve(w)
+      );
+      expect(controller.isSpinning()).toBe(true);
+    });
+
+    expect(NAMES.map((n) => n.id)).toContain(winner.id);
+    expect(controller.isSpinning()).toBe(false);
+    expect(controller.getRotation()).toBe(1234);
+  });
+
+  test("a spin event with elapsedMs already past the spin duration completes immediately at the target rotation", async () => {
+    const controller = createSpinController({ ctx: makeFakeCtx(), getColors: (n) => Array(n).fill("#fff") });
+
+    const winner = await new Promise((resolve) => {
+      controller.playSpinEvent(
+        { startRotation: 0, targetRotation: 1440, names: NAMES, elapsedMs: 999999 },
+        (w) => resolve(w)
+      );
+    });
+
+    expect(NAMES.map((n) => n.id)).toContain(winner.id);
+    expect(controller.getRotation()).toBe(1440);
+  });
+
+  test("playSpinEvent() while already spinning is a no-op", async () => {
+    const controller = createSpinController({ ctx: makeFakeCtx(), getColors: (n) => Array(n).fill("#fff") });
+    let completions = 0;
+
+    const first = new Promise((resolve) => {
+      controller.playSpinEvent(
+        { startRotation: 0, targetRotation: 1234, names: NAMES, elapsedMs: 0 },
+        (w) => {
+          completions++;
+          resolve(w);
+        }
+      );
+    });
+
+    controller.playSpinEvent(
+      { startRotation: 0, targetRotation: 999, names: NAMES, elapsedMs: 0 },
+      () => {
+        completions++;
+      }
+    );
+
+    await first;
+    expect(completions).toBe(1);
+  });
+});

@@ -7,7 +7,9 @@ import {
   push,
   remove,
   onValue,
+  runTransaction,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+import { SPIN_DURATION_MS } from "./spin.js";
 
 // Firebase web config is public-safe: access control comes from the
 // database rules (firebase/database.rules.json), not from hiding this key.
@@ -26,6 +28,19 @@ const db = getDatabase(app);
 
 function namesRefFor(roomId) {
   return ref(db, `rooms/${roomId}/names`);
+}
+
+function spinRefFor(roomId) {
+  return ref(db, `rooms/${roomId}/spin`);
+}
+
+let serverTimeOffset = 0;
+onValue(ref(db, ".info/serverTimeOffset"), (snapshot) => {
+  serverTimeOffset = snapshot.val() || 0;
+});
+
+export function getServerNow() {
+  return Date.now() + serverTimeOffset;
 }
 
 export async function ensureRoom(roomId) {
@@ -60,4 +75,23 @@ export async function addNameToRoom(roomId, text) {
 export async function removeNameFromRoom(roomId, nameId) {
   const nameRef = ref(db, `rooms/${roomId}/names/${nameId}`);
   await remove(nameRef);
+}
+
+export async function startSpin(roomId, { startRotation, targetRotation, names }) {
+  const spinRef = spinRefFor(roomId);
+  const result = await runTransaction(spinRef, (current) => {
+    const now = getServerNow();
+    if (current && now - current.startedAt < SPIN_DURATION_MS) {
+      return; // abort: a spin is already in progress for this room
+    }
+    return { startedAt: now, startRotation, targetRotation, names };
+  });
+  return result.committed;
+}
+
+export function subscribeToSpin(roomId, callback) {
+  const spinRef = spinRefFor(roomId);
+  return onValue(spinRef, (snapshot) => {
+    callback(snapshot.val());
+  });
 }
