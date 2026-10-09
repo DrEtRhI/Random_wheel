@@ -7,7 +7,7 @@ function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-export function createSpinController({ ctx, getColors }) {
+export function createSpinController({ ctx, getColors, onTick }) {
   let rotationDeg = 0;
   let spinning = false;
 
@@ -26,12 +26,22 @@ export function createSpinController({ ctx, getColors }) {
     const startRotation = rotationDeg;
     const targetRotation = computeSpinTarget(startRotation);
     const startTime = performance.now();
+    const sliceAngleDeg = 360 / names.length;
+    let lastBoundaryCrossed = Math.floor(startRotation / sliceAngleDeg);
 
     function frame(now) {
       const elapsed = now - startTime;
       const t = Math.min(elapsed / SPIN_DURATION_MS, 1);
       rotationDeg = startRotation + (targetRotation - startRotation) * easeOutCubic(t);
       draw(names);
+
+      if (onTick) {
+        const boundaryNow = Math.floor(rotationDeg / sliceAngleDeg);
+        if (boundaryNow > lastBoundaryCrossed) {
+          for (let i = lastBoundaryCrossed; i < boundaryNow; i++) onTick();
+          lastBoundaryCrossed = boundaryNow;
+        }
+      }
 
       if (t < 1) {
         requestAnimationFrame(frame);
