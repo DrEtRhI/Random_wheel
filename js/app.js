@@ -10,7 +10,7 @@ import {
 } from "./firebaseRoom.js";
 import { generateSliceColors } from "./colors.js";
 import { createExclusionStore } from "./exclusionStore.js";
-import { createSpinController } from "./spin.js";
+import { createSpinController, SPIN_DURATION_MS } from "./spin.js";
 import { computeSpinTarget } from "./wheelGeometry.js";
 import { renderNameList, wireAddForm } from "./panel.js";
 import { showWinnerPopup, wirePopupButtons } from "./popup.js";
@@ -124,6 +124,10 @@ async function main() {
     lastHandledSpinStartedAt = spinEvent.startedAt;
 
     const elapsedMs = getServerNow() - spinEvent.startedAt;
+    // A spin that already finished (e.g. from a previous visit) is history:
+    // don't replay it or pop up its winner when the page opens.
+    if (elapsedMs >= SPIN_DURATION_MS) return;
+
     spinController.playSpinEvent(
       {
         startRotation: spinEvent.startRotation,

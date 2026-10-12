@@ -30,6 +30,7 @@ beforeEach(() => {
     "winner-ok-button": makeFakeButton(),
     "winner-copy-button": makeFakeButton(),
     "winner-remove-button": makeFakeButton(),
+    "winner-copy-error": { hidden: true },
   };
   global.document = {
     getElementById: (id) => elements[id],
@@ -85,7 +86,7 @@ describe("wirePopupButtons", () => {
     expect(removeCountB).toBe(1);
   });
 
-  test("copy button flashes 'Copied!' on success", async () => {
+  test("copy button closes the popup on success without showing an error", async () => {
     showWinnerPopup("Alice");
     global.html2canvas = async () => ({ toBlob: (cb) => cb({ fakeBlob: true }) });
     global.ClipboardItem = function (data) {
@@ -99,10 +100,12 @@ describe("wirePopupButtons", () => {
 
     await copyButton.onclick();
 
-    expect(copyButton.textContent).toBe("Copied!");
+    expect(elements["winner-popup"].hidden).toBe(true);
+    expect(elements["winner-copy-error"].hidden).toBe(true);
+    expect(copyButton.textContent).toBe("📷 Copy image");
   });
 
-  test("copy button flashes 'Copy failed' when the clipboard write rejects", async () => {
+  test("copy failure keeps the popup open and shows the fallback message", async () => {
     showWinnerPopup("Alice");
     global.html2canvas = async () => ({ toBlob: (cb) => cb({ fakeBlob: true }) });
     global.ClipboardItem = function (data) {
@@ -122,6 +125,14 @@ describe("wirePopupButtons", () => {
 
     await copyButton.onclick();
 
-    expect(copyButton.textContent).toBe("Copy failed");
+    expect(elements["winner-popup"].hidden).toBe(false);
+    expect(elements["winner-copy-error"].hidden).toBe(false);
+    expect(copyButton.textContent).toBe("📷 Copy image");
+  });
+
+  test("showing a new winner hides a previous copy error", () => {
+    elements["winner-copy-error"].hidden = false;
+    showWinnerPopup("Bob");
+    expect(elements["winner-copy-error"].hidden).toBe(true);
   });
 });
