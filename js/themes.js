@@ -55,3 +55,16 @@ export function getRandomTheme() {
   const index = Math.floor(Math.random() * THEMES.length);
   return THEMES[index];
 }
+
+// Special background shown only when Clara wins. Deliberately kept out of
+// THEMES so the random theme button can never pick it.
+export const CLARA_THEME = {
+  id: "horse-loustic",
+  label: "Loustic the horse",
+  emoji: "\u{1F434}",
+  image: "themes/horse_loustic.jpg",
+};
+
+export function getWinnerTheme(name) {
+  return name.trim().toLowerCase() === "clara" ? CLARA_THEME : null;
+}
