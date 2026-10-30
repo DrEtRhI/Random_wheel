@@ -56,6 +56,7 @@ async function main() {
 
   function applyTheme(theme) {
     document.body.style.backgroundImage = `url("images/${theme.image}")`;
+    document.body.style.backgroundPosition = theme.position ?? "";
     document.body.style.setProperty("--pointer-bg", "#ffffff");
     document.body.style.setProperty("--pointer-emoji", JSON.stringify(theme.emoji));
   }
