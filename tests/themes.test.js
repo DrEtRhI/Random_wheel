@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { THEMES, getRandomTheme } from "../js/themes.js";
+import { THEMES, getRandomTheme, getWinnerTheme, CLARA_THEME } from "../js/themes.js";
 
 describe("THEMES", () => {
   test("has exactly 50 entries", () => {
@@ -34,5 +34,24 @@ describe("getRandomTheme", () => {
       seen.add(getRandomTheme().id);
     }
     expect(seen.size).toBeGreaterThan(1);
+  });
+});
+
+describe("getWinnerTheme", () => {
+  test("returns the Loustic horse theme for Clara, case-insensitively", () => {
+    for (const name of ["clara", "Clara", "CLARA", "  cLaRa  "]) {
+      expect(getWinnerTheme(name)).toBe(CLARA_THEME);
+    }
+    expect(CLARA_THEME.image).toBe("themes/horse_loustic.jpg");
+  });
+
+  test("returns null for any other name", () => {
+    for (const name of ["Clarisse", "Clara B", "Anna", ""]) {
+      expect(getWinnerTheme(name)).toBeNull();
+    }
+  });
+
+  test("the Clara theme is never part of the random rotation", () => {
+    expect(THEMES).not.toContain(CLARA_THEME);
   });
 });

@@ -17,7 +17,7 @@ import { showWinnerPopup, wirePopupButtons } from "./popup.js";
 import { MAX_NAMES } from "./validation.js";
 import { unlockAudio, playTick, playWin } from "./sound.js";
 import { getCurrentSeason } from "./season.js";
-import { getRandomTheme } from "./themes.js";
+import { getRandomTheme, getWinnerTheme } from "./themes.js";
 
 const colorCache = new Map();
 function getColorsForCount(n) {
@@ -54,11 +54,32 @@ async function main() {
   const addNameButtonEl = document.getElementById("add-name-button");
   const randomThemeButtonEl = document.getElementById("random-theme-button");
 
-  randomThemeButtonEl.addEventListener("click", () => {
-    const theme = getRandomTheme();
+  function applyTheme(theme) {
     document.body.style.backgroundImage = `url("images/${theme.image}")`;
     document.body.style.setProperty("--pointer-bg", "#ffffff");
     document.body.style.setProperty("--pointer-emoji", JSON.stringify(theme.emoji));
+  }
+
+  // Inline styles in place before a winner theme took over, so they can be
+  // restored once someone else wins. null when no winner theme is showing.
+  let styleBeforeWinnerTheme = null;
+
+  function updateWinnerTheme(winnerText) {
+    const theme = getWinnerTheme(winnerText);
+    if (theme) {
+      if (styleBeforeWinnerTheme === null) {
+        styleBeforeWinnerTheme = document.body.style.cssText;
+      }
+      applyTheme(theme);
+    } else if (styleBeforeWinnerTheme !== null) {
+      document.body.style.cssText = styleBeforeWinnerTheme;
+      styleBeforeWinnerTheme = null;
+    }
+  }
+
+  randomThemeButtonEl.addEventListener("click", () => {
+    styleBeforeWinnerTheme = null;
+    applyTheme(getRandomTheme());
   });
 
   const spinController = createSpinController({
@@ -137,6 +158,7 @@ async function main() {
       },
       (winner) => {
         playWin();
+        updateWinnerTheme(winner.text);
         showWinnerPopup(winner.text);
         wirePopupButtons({
           onRemove: () => {
