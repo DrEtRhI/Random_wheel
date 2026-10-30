@@ -63,6 +63,8 @@ export const CLARA_THEME = {
   label: "Loustic the horse",
   emoji: "\u{1F434}",
   image: "themes/horse_loustic.jpg",
+  // Anchor to the bottom so Loustic's head (grazing) is never cropped off.
+  position: "center bottom",
 };
 
 export function getWinnerTheme(name) {

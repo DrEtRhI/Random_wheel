@@ -43,6 +43,7 @@ describe("getWinnerTheme", () => {
       expect(getWinnerTheme(name)).toBe(CLARA_THEME);
     }
     expect(CLARA_THEME.image).toBe("themes/horse_loustic.jpg");
+    expect(CLARA_THEME.position).toBe("center bottom");
   });
 
   test("returns null for any other name", () => {
